@@ -21,7 +21,14 @@ export class MessageDecodingInterceptor implements NestInterceptor {
     }
 
     // Decode and parse into string
-    return Buffer.from(message.data, "base64").toString();
+    const dataString = Buffer.from(message.data, "base64").toString();
+
+    // Attempt to cast to JSON to enable validation of objects
+    try {
+      return JSON.parse(dataString);
+    } catch {
+      return dataString;
+    }
   }
 
   async intercept(
