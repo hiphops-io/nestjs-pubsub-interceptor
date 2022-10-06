@@ -1,12 +1,30 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppService } from './app.service';
+import { MessageDecodingInterceptor } from '@hiphops/nestjs-pubsub-interceptor';
+import { IsNumber, IsString } from 'class-validator';
+
+class SomeDto {
+  @IsString()
+  someString: string;
+  @IsNumber()
+  someNumber: number;
+}
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post()
+  @UseInterceptors(MessageDecodingInterceptor)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  root(@Body() someObject: SomeDto): string {
+    return someObject.someString;
   }
 }

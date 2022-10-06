@@ -7,9 +7,11 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
+    "noLib": false,
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -17,5 +19,7 @@
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
