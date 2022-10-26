@@ -31,6 +31,12 @@ export class MessageDecodingInterceptor implements NestInterceptor {
     }
   }
 
+  private addAttributesToHeader(attributes: any, request: Request) {
+    Object.keys(attributes).forEach((key) => {
+      request.headers[`x-pubsub-${key}`] = attributes[key]
+    })
+  }
+
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -40,7 +46,9 @@ export class MessageDecodingInterceptor implements NestInterceptor {
 
     try {
       // Now allow handlers to focus on the unwrapped/decoded body
-      request.body = await this.parseMessagePayload(request.body.message);
+      const message = await this.parseMessagePayload(request.body.message);
+      this.addAttributesToHeader(request.body.message.attributes, request);
+      request.body = message;
       return next.handle();
     } catch (e) {
       // We re-raise any non-validation errors as these are unhandled
