@@ -65,4 +65,23 @@ describe('AppController (e2e)', () => {
 
     return request(app.getHttpServer()).post('/').send(msgPayload).expect(400);
   });
+
+  it('/task-request (POST) should return 201 with no attributes', () => {
+    msgPayload.message.attributes = {};
+    return request(app.getHttpServer())
+      .post('/headers')
+      .send(msgPayload)
+      .expect(201);
+  });
+
+  it('/task-request (POST) should add header based on attributes', (done) => {
+    request(app.getHttpServer())
+      .post('/headers')
+      .send(msgPayload)
+      .expect(201)
+      .end(function (err, res) {
+        expect(res.body['x-pubsub-foo']).toBe('bar');
+        done();
+      });
+  });
 });
