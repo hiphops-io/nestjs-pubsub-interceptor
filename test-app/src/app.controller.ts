@@ -5,6 +5,7 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  Headers,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { MessageDecodingInterceptor } from '@hiphops/nestjs-pubsub-interceptor';
@@ -26,5 +27,12 @@ export class AppController {
   @UsePipes(new ValidationPipe({ transform: true }))
   root(@Body() someObject: SomeDto): string {
     return someObject.someString;
+  }
+
+  @Post('headers')
+  @UseInterceptors(MessageDecodingInterceptor)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  headers(@Headers() headers): string {
+    return headers;
   }
 }
