@@ -7,27 +7,29 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && nest start",
+    "start:dev": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && nest start --watch",
+    "start:debug": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
-    "test:watch": "jest --watch",
+    "test:watch": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:debug": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "$npm_execpath relative-deps add ../nestjs-pubsub-interceptor && jest --config ./test/jest-e2e.json",
+    "prepare": "relative-deps"
   },
   "dependencies": {
-    "@hiphops/nestjs-pubsub-interceptor": "../nestjs-pubsub-interceptor",
+    "@hiphops/nestjs-pubsub-interceptor": "link:../nestjs-pubsub-interceptor",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "reflect-metadata": "^0.1.13",
+    "relative-deps": "^1.0.7",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
   },
@@ -70,5 +72,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "relativeDependencies": {
+    "@hiphops/nestjs-pubsub-interceptor": "../nestjs-pubsub-interceptor"
   }
 }
