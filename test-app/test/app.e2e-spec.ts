@@ -49,21 +49,64 @@ describe('AppController (e2e)', () => {
   it('/task-request (POST) should return 400 for non b64 encoding', () => {
     msgPayload.message.data = 'Some non-base64 string';
 
-    return request(app.getHttpServer()).post('/').send(msgPayload).expect(400);
+    return request(app.getHttpServer())
+      .post('/')
+      .send(msgPayload)
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: [
+              '{"target":{"data":"Some non-base64 string","messageId":"1","attributes":{"foo":"bar"}},"value":"Some non-base64 string","property":"data","children":[],"constraints":{"isBase64":"data must be base64 encoded"}}',
+            ],
+            statusCode: 400,
+          }),
+        );
+      });
   });
 
   it('/task-request (POST) should return 400 for bad message format', () => {
     // Delete a required key
     delete msgPayload.message.data;
 
-    return request(app.getHttpServer()).post('/').send(msgPayload).expect(400);
+    return request(app.getHttpServer())
+      .post('/')
+      .send(msgPayload)
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: [
+              '{"target":{"messageId":"1","attributes":{"foo":"bar"}},"property":"data","children":[],"constraints":{"isBase64":"data must be base64 encoded"}}',
+            ],
+            statusCode: 400,
+          }),
+        );
+      });
   });
 
   it('/task-request (POST) should return 400 for bad SomeDto format', () => {
     const badTaskContext = Buffer.from('{"foo":"bar"}').toString('base64');
     msgPayload.message.data = badTaskContext;
 
-    return request(app.getHttpServer()).post('/').send(msgPayload).expect(400);
+    return request(app.getHttpServer())
+      .post('/')
+      .send(msgPayload)
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: [
+              'someString must be a string',
+              'someNumber must be a number conforming to the specified constraints',
+            ],
+            statusCode: 400,
+          }),
+        );
+      });
   });
 
   it('/task-request (POST) should return 201 with no attributes', () => {
