@@ -109,6 +109,58 @@ describe('AppController (e2e)', () => {
       });
   });
 
+  it('/task-request (POST) should return 400 for empty payload', () => {
+    return request(app.getHttpServer())
+      .post('/')
+      .send('')
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: ['Missing message field in request body'],
+            statusCode: 400,
+          }),
+        );
+      });
+  });
+
+  it('/task-request (POST) should return 400 for empty object payload', () => {
+    return request(app.getHttpServer())
+      .post('/')
+      .send({})
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: ['Missing message field in request body'],
+            statusCode: 400,
+          }),
+        );
+      });
+  });
+
+  it('/task-request (POST) should return 400 for string message payload', () => {
+    msgPayload.message = 'a string';
+
+    return request(app.getHttpServer())
+      .post('/')
+      .send(msgPayload)
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: 'Bad Request',
+            message: [
+              'The message field has value: "a string". This is not a valid object',
+            ],
+            statusCode: 400,
+          }),
+        );
+      });
+  });
+
   it('/task-request (POST) should return 201 with no attributes', () => {
     msgPayload.message.attributes = {};
     return request(app.getHttpServer())
