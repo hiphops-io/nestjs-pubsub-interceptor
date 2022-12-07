@@ -3,6 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  BadRequestException,
 } from "@nestjs/common";
 import { Observable, of } from "rxjs";
 import { MessageDto } from "./schema";
@@ -10,9 +11,20 @@ import { Request } from "express";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject, ValidationError } from "class-validator";
 
+export class InvalidObject extends BadRequestException {
+  constructor(errorMessage: string) {
+    super(errorMessage);
+  }
+}
+
 @Injectable()
 export class MessageDecodingInterceptor implements NestInterceptor {
-  private async parseMessagePayload(messagePayload: any): Promise<string> {
+  private async parseMessagePayload(messagePayload: object): Promise<string> {
+    if (messagePayload === undefined)
+      throw new InvalidObject(`Missing message field in request body`);
+    if (!(messagePayload instanceof Object))
+      throw new InvalidObject(`The message field has value: "${messagePayload}". This is not a valid object`);
+
     const message = plainToInstance(MessageDto, messagePayload);
 
     // Allow validation exceptions to bubble up
@@ -35,16 +47,20 @@ export class MessageDecodingInterceptor implements NestInterceptor {
     })
   }
 
-  private formatValidationError(error: ValidationError[]): Object {
+  private formatValidationError(error: ValidationError[] | InvalidObject): Object {
     let errorPayload = {
       error: "Bad Request",
       statusCode: 400,
       message: [] as string[],
     }
 
-    error.forEach((e) => {
-      errorPayload.message.push(JSON.stringify(e));
-    });
+    if (error instanceof InvalidObject) {
+      errorPayload.message.push(error.message);
+    } else {
+      error.forEach((e) => {
+        errorPayload.message.push(JSON.stringify(e));
+      });
+    }
 
     return errorPayload;
   }
@@ -63,12 +79,16 @@ export class MessageDecodingInterceptor implements NestInterceptor {
       request.body = message;
       return next.handle();
     } catch (e) {
-      // We re-raise any non-validation errors as these are unhandled
-      if (!(e instanceof Array && e[0] instanceof ValidationError)) throw e;
+        // If it was a validation error, let's intercept and return 400
+        if ((e instanceof Array && e[0] instanceof ValidationError) ||
+          (e instanceof InvalidObject)
+      ) {
+        context.switchToHttp().getResponse().status(400);
+        return of(this.formatValidationError(e));
+      }
 
-      // But if it was a validation error, let's intercept and return 400
-      context.switchToHttp().getResponse().status(400);
-      return of(this.formatValidationError(e));
+      // But we re-raise any non-validation errors as these are unhandled
+      throw e;
     }
   }
 }
