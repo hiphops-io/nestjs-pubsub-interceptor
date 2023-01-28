@@ -169,6 +169,22 @@ describe('AppController (e2e)', () => {
       .expect(201);
   });
 
+  it('/task-request (POST) should return 201 with null attributes', () => {
+    msgPayload.message.attributes = null;
+    return request(app.getHttpServer())
+      .post('/headers')
+      .send(msgPayload)
+      .expect(201);
+  });
+
+  it('/task-request (POST) should return 201 with missing attributes', () => {
+    delete msgPayload.message.attributes;
+    return request(app.getHttpServer())
+      .post('/headers')
+      .send(msgPayload)
+      .expect(201);
+  });
+
   it('/task-request (POST) should add header based on attributes', (done) => {
     request(app.getHttpServer())
       .post('/headers')
