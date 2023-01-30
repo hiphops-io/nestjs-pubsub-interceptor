@@ -1,6 +1,6 @@
 {
   "name": "@hiphops/nestjs-pubsub-interceptor",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A NestJS Interceptor to decode and unwrap GCP Pub/Sub push messages",
   "main": "dist/index.js",
   "repository": {
