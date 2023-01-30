@@ -42,6 +42,8 @@ export class MessageDecodingInterceptor implements NestInterceptor {
   }
 
   private addAttributesToHeader(attributes: any, request: Request) {
+    if (attributes === undefined || attributes === null) return;
+
     Object.keys(attributes).forEach((key) => {
       request.headers[`x-pubsub-${key}`] = attributes[key]
     })
